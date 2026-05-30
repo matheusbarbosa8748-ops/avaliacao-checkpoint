@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:usedev_uninassau/src/screens/initial_screen.dart';
+import 'package:usedev_uninassau/src/screens/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,13 +8,16 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'UseDev',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: InitialScreen(),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+      ),
+      home: const LoginScreen(),
     );
   }
 }

@@ -1,56 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:usedev_uninassau/src/widgets/hero_section_widget.dart';
-import 'package:usedev_uninassau/src/widgets/product_card_widget.dart';
-import 'package:usedev_uninassau/src/widgets/subscription_section_widget.dart';
+import 'package:usedev_uninassau/src/widgets/hero_tela.dart';
+import 'package:usedev_uninassau/src/widgets/product_card_widgets.dart';
+import 'package:usedev_uninassau/src/widgets/subscription_section_widgets.dart';
+import 'package:usedev_uninassau/src/widgets/footer_widget.dart';
+import 'package:usedev_uninassau/src/widgets/custom_app_bar.dart';
+import 'package:usedev_uninassau/src/services/product_service.dart';
+import 'package:usedev_uninassau/src/models/product_model.dart';
 
-class InitialScreen extends StatefulWidget {
-  const InitialScreen({super.key});
+class InitialScreen extends StatelessWidget {
+  const InitialScreen({Key? key}) : super(key: key);
 
-  @override
-  _InitialScreenState createState() => _InitialScreenState();
-}
-
-class _InitialScreenState extends State<InitialScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: Icon(Icons.menu, size: 40),
-        title: Image.asset('assets/logo_usedev.png', height: 40),
-        centerTitle: true,
-        actions: [
-          Icon(Icons.person_outline, size: 40),
-          SizedBox(width: 10),
-          Icon(Icons.shopping_cart_outlined, size: 40),
-          SizedBox(width: 25),
-        ],
-      ),
+      appBar: const CustomAppBar(),
       body: SingleChildScrollView(
         child: Column(
-          spacing: 20,
-          crossAxisAlignment: .stretch,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            HeroSectionWidget(),
-            Text(
-              'Promos Especiais',
-              textAlign: .center,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: .bold,
-                fontFamily: GoogleFonts.orbitron().fontFamily,
+            const HeroTela(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Text(
+                'Promos Especiais',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: GoogleFonts.orbitron().fontFamily,
+                ),
               ),
             ),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: 5,
-              itemBuilder: (context, index) => ProductCardWidget(
-                nome: 'Produto 0$index',
-                url: 'https://placehold.co/600x600.png',
-                preco: '10$index,00',
-              ),
+            FutureBuilder<List<ProductModel>>(
+              future: ProductService.getAllProducts(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(40.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        'Erro ao carregar produtos: ${snapshot.error}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                      ),
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text('Nenhum produto disponível'),
+                    ),
+                  );
+                }
+
+                final products = snapshot.data!;
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) =>
+                      ProductCardWidgets(product: products[index]),
+                );
+              },
             ),
-            SubscriptionSectionWidget(),
+            const SubscriptionSectionWidgets(),
+            const FooterWidget(),
           ],
         ),
       ),
